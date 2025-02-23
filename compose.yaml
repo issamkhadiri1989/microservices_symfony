@@ -1,71 +1,91 @@
 services:
-    ### START API ###
-    api_nginx:
-      build:
-        context: ./infra/
-        args:
-          BUILD_ARGUMENT_ENV: dev
-        dockerfile: ./nginx/Dockerfile
-      restart: always
-      ports:
-        - "8090:80"
-        - "443:443"
-      volumes:
-        - .:/var/www/html:ro,cached
-        - ./infra/nginx/conf.d:/etc/nginx/conf.d
-      depends_on:
-        - api_symfony
-      networks:
-        - symfony
+    nginx:
+        build:
+            context: ./infra/
+            args:
+                BUILD_ARGUMENT_ENV: dev
+            dockerfile: ./nginx/Dockerfile
+        restart: always
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - .:/var/www/html:ro,cached
+            - ./infra/nginx/conf.d:/etc/nginx/conf.d
+        depends_on:
+            - server
+        networks:
+            - symfony
 
-    api_symfony:
-      build:
-        context: ./infra/
-        dockerfile: ./php/Dockerfile
-      volumes:
-        - .:/var/www/html:cached
-        - ./infra/php/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
-        - ./infra/php/config/php.ini:/usr/local/etc/php/php.ini
-        - ./infra/php/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
-      depends_on:
-        - api_mysql
-      networks:
-        - symfony
-      expose:
-        - "9000"
-        - "9003"
+    server:
+        build:
+            context: ./infra/
+            dockerfile: ./php/Dockerfile
+        volumes:
+            - .:/var/www/html:cached
+            - ./infra/php/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
+            - ./infra/php/config/php.ini:/usr/local/etc/php/php.ini
+            - ./infra/php/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+        depends_on:
+            - mysql
+        networks:
+            - symfony
+        expose:
+            - "9000"
+            - "9003"
 
-    api_mysql:
-      image: mysql
-      platform: linux/x86_64
-      command: --innodb-use-native-aio=${INNODB_USE_NATIVE_AIO:-1} --sql_mode=${SQL_MODE:-"ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"}
-      environment:
-        MYSQL_ROOT_PASSWORD: secret
-        MYSQL_DATABASE: symfony
-      ports:
-        - "3306:3306"
-      volumes:
-        - mysql:/var/lib/mysql:delegated
-      networks:
-        - symfony
+    mysql:
+        image: mysql
+        platform: linux/x86_64
+        command: --innodb-use-native-aio=${INNODB_USE_NATIVE_AIO:-1} --sql_mode=${SQL_MODE:-"ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"}
+        environment:
+            MYSQL_ROOT_PASSWORD: secret
+            MYSQL_DATABASE: symfony
+        ports:
+            - "3306:3306"
+        volumes:
+            - mysql:/var/lib/mysql:delegated
+        networks:
+            - symfony
 
-    api_myadmin:
-      image: phpmyadmin/phpmyadmin:5
-      environment:
-        PMA_HOST: api_mysql
-      ports:
-        - "8080:80"
-      depends_on:
-        - api_mysql
-      networks:
-        - symfony
-      volumes:
-        - db_admin_data:/var/www/html
+    myadmin:
+        image: phpmyadmin/phpmyadmin:5
+        environment:
+            PMA_HOST: mysql
+        ports:
+            - "8080:80"
+        depends_on:
+            - mysql
+        networks:
+            - symfony
+        volumes:
+            - db_admin_data:/var/www/html
+
+    elasticsearch:
+        image: "docker.elastic.co/elasticsearch/elasticsearch:7.12.1"
+        environment:
+            - node.name=elasticsearch
+            - cluster.name=docker-cluster
+            - bootstrap.memory_lock=true
+            - discovery.type=single-node
+            - xpack.security.enabled=false
+            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        volumes:
+            - esdata:/usr/share/elasticsearch/data
+        ports:
+            - "9200:9200"
+        networks:
+            - symfony
 
 volumes:
-  db_admin_data:
-  mysql:
+    db_admin_data:
+    mysql:
+    esdata:
 
 networks:
-  symfony:
-    name: symfony
+    symfony:
+        name: symfony

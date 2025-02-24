@@ -32,7 +32,7 @@ final class GenreFactory extends PersistentProxyObjectFactory
     protected function defaults(): array|callable
     {
         return [
-            'name' => self::faker()->text(20),
+            'name' => self::faker()->text(5),
         ];
     }
 

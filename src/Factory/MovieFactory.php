@@ -32,7 +32,7 @@ final class MovieFactory extends PersistentProxyObjectFactory
     protected function defaults(): array|callable
     {
         return [
-            'name' => self::faker()->text(255),
+            'name' => self::faker()->text(10),
             'synopsis' => self::faker()->text(),
             'genres' => GenreFactory::randomSet(\rand(1, 5)),
         ];

@@ -3,4 +3,18 @@ fos_elastica:
     clients:
         default: { url: '%env(ELASTICSEARCH_URL)%' }
     indexes:
-        app: null
+        movie:
+            properties:
+                id: { type: integer }
+                name: { type: text }
+                synopsis: { type: text }
+                genres:
+                    type: nested
+                    properties:
+                        name: { type: text }
+                        id: { type: integer }
+            persistence:
+                driver: orm
+                model: App\Entity\Movie
+                listener:
+                    insert: false

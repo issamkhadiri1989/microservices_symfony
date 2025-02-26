@@ -8,7 +8,7 @@ use Elastica\Index;
 use Elastica\Query;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class AllItemsQuery implements QueryInterface
+class GetAllMoviesFromProvider implements QueryInterface
 {
     public function __construct(
         #[Autowire(service: 'fos_elastica.index.movie')] private readonly Index $index,

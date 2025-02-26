@@ -15,7 +15,6 @@ final class DatabaseMovieHandler implements CommandHandlerInterface
     {
     }
 
-
     public function handle(Movie $movie): void
     {
         $this->manager->persist($movie);

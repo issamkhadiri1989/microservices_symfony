@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Domain\Movie\Command\Handler\CommandHandlerInterface;
-use App\Domain\Movie\Query\Handler\QueryInterface;
+use App\Domain\Movie\Query\Handler\QueryItemsInterface;
 use App\Entity\Movie;
 use App\Form\Type\MovieType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -40,9 +40,9 @@ final class DefaultController extends AbstractController
     }
 
     #[Route('/all', name: 'app.movies.all')]
-    public function listMovies(QueryInterface $query): Response
+    public function listMovies(QueryItemsInterface $query): Response
     {
-        $movies = $query->getItems();
+        $movies = $query->getAllMovies();
 
         return $this->render('default/all.html.twig', [
             'movies' => $movies,

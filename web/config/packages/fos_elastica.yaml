@@ -18,3 +18,19 @@ fos_elastica:
                 model: App\Entity\Movie
                 listener:
                     insert: false
+
+        genre:
+            properties:
+                id: { type: integer }
+                name: { type: text }
+                movies:
+                    type: nested
+                    properties:
+                        name: { type: text }
+                        synopsis: { type: text }
+                        id: { type: integer }
+            persistence:
+                driver: orm
+                model: App\Entity\Genre
+                listener:
+                    insert: false

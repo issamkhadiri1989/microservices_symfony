@@ -1,7 +1,8 @@
 services:
-    nginx:
+#web
+    web_nginx:
         build:
-            context: ./infra/
+            context: ./infra/web
             args:
                 BUILD_ARGUMENT_ENV: dev
             dockerfile: ./nginx/Dockerfile
@@ -10,31 +11,31 @@ services:
             - "80:80"
             - "443:443"
         volumes:
-            - .:/var/www/html:ro,cached
-            - ./infra/nginx/conf.d:/etc/nginx/conf.d
+            - ./web:/var/www/html:ro,cached
+            - ./infra/web/nginx/conf.d:/etc/nginx/conf.d
         depends_on:
-            - server
+            - web_server
         networks:
             - symfony
 
-    server:
+    web_server:
         build:
-            context: ./infra/
+            context: ./infra/web
             dockerfile: ./php/Dockerfile
         volumes:
-            - .:/var/www/html:cached
-            - ./infra/php/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
-            - ./infra/php/config/php.ini:/usr/local/etc/php/php.ini
-            - ./infra/php/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+            - ./web:/var/www/html:cached
+            - ./infra/web/php/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
+            - ./infra/web/php/config/php.ini:/usr/local/etc/php/php.ini
+            - ./infra/web/php/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
         depends_on:
-            - mysql
+            - web_mysql
         networks:
             - symfony
         expose:
             - "9000"
             - "9003"
 
-    mysql:
+    web_mysql:
         image: mysql
         platform: linux/x86_64
         command: --innodb-use-native-aio=${INNODB_USE_NATIVE_AIO:-1} --sql_mode=${SQL_MODE:-"ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"}
@@ -48,14 +49,14 @@ services:
         networks:
             - symfony
 
-    myadmin:
+    web_myadmin:
         image: phpmyadmin/phpmyadmin:5
         environment:
             PMA_HOST: mysql
         ports:
             - "8080:80"
         depends_on:
-            - mysql
+            - web_mysql
         networks:
             - symfony
         volumes:
@@ -80,6 +81,69 @@ services:
             - "9200:9200"
         networks:
             - symfony
+
+# API
+    api_nginx:
+        build:
+            context: ./infra/api
+            args:
+                BUILD_ARGUMENT_ENV: dev
+            dockerfile: ./nginx/Dockerfile
+        restart: always
+        ports:
+            - "8000:80"
+            - "4430:443"
+        volumes:
+            - ./api:/var/www/html:ro,cached
+            - ./infra/api/nginx/conf.d:/etc/nginx/conf.d
+        depends_on:
+            - api_server
+        networks:
+            - symfony
+
+    api_server:
+        build:
+            context: ./infra/api
+            dockerfile: ./php/Dockerfile
+        volumes:
+            - ./api:/var/www/html:cached
+            - ./infra/api/php/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
+            - ./infra/api/php/config/php.ini:/usr/local/etc/php/php.ini
+            - ./infra/api/php/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+#        depends_on:
+#            - api_mysql
+        networks:
+            - symfony
+        expose:
+            - "9000"
+            - "9003"
+
+#    api_mysql:
+#        image: mysql
+#        platform: linux/x86_64
+#        command: --innodb-use-native-aio=${INNODB_USE_NATIVE_AIO:-1} --sql_mode=${SQL_MODE:-"ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"}
+#        environment:
+#            MYSQL_ROOT_PASSWORD: secret
+#            MYSQL_DATABASE: symfony
+#        ports:
+#            - "33060:3306"
+#        volumes:
+#            - mysql:/var/lib/mysql:delegated
+#        networks:
+#            - symfony
+
+#    api_myadmin:
+#        image: phpmyadmin/phpmyadmin:5
+#        environment:
+#            PMA_HOST: mysql
+#        ports:
+#            - "8080:80"
+#        depends_on:
+#            - api_mysql
+#        networks:
+#            - symfony
+#        volumes:
+#            - db_admin_data:/var/www/html
 
 volumes:
     db_admin_data:

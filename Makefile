@@ -18,7 +18,7 @@ recreate: down
 
 # API
 start-api: start-elasticsearch
-	docker compose up -d --force-recreate  --remove-orphans  --build api_nginx api_server
+	docker compose up -d --remove-orphans api_nginx api_server
 enter-api:
 	docker compose exec api_server bash
 
@@ -27,9 +27,22 @@ start-elasticsearch:
 	docker compose up -d elasticsearch
 
 # WEB
-start-web:
-	docker compose up -d --force-recreate --remove-orphans web_nginx web_server web_mysql web_myadmin
+start-mysql:
+	docker compose up -d --force-recreate --remove-orphans web_mysql web_myadmin
+start-server:
+	docker compose up -d --force-recreate --remove-orphans  web_nginx web_server
+start-web: start-server start-mysql
 enter-web:
 	docker compose exec web_server bash
+
+# USER
+start-user-database:
+	docker compose up -d --force-recreate --remove-orphans user_mysql user_myadmin
+start-user-server:
+	docker compose up -d --force-recreate --remove-orphans user_web_nginx user_server
+start-user: start-user-database start-user-server
+enter-user:
+	docker compose exec user_server bash
+
 indexation-web:
 	docker compose exec web_server php bin/console fos:elastica:populate

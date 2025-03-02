@@ -26,4 +26,7 @@ class Movie
     public string $synopsis;
 
     private string $name;
+
+    /** @var Genre[]  */
+    public iterable $genres;
 }

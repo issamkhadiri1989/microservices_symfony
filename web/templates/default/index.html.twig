@@ -1,8 +1,9 @@
 {% extends 'base.html.twig' %}
+{% form_theme form with ['forms/movie.html.twig', 'bootstrap_5_layout.html.twig'] %}
 {% block title %}Hello DefaultController!{% endblock %}
 {% block body %}
     {{ form_start(form) }}
     {{ form_row(form) }}
-    <button>Save</button>
+    <button class="btn btn-primary">Save</button>
     {{ form_end(form) }}
 {% endblock %}

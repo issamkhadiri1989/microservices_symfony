@@ -52,7 +52,7 @@ services:
     web_myadmin:
         image: phpmyadmin/phpmyadmin:5
         environment:
-            PMA_HOST: mysql
+            PMA_HOST: web_mysql
         ports:
             - "8080:80"
         depends_on:
@@ -145,9 +145,73 @@ services:
 #        volumes:
 #            - db_admin_data:/var/www/html
 
+# User
+    user_web_nginx:
+        build:
+            context: ./infra/user
+            args:
+                BUILD_ARGUMENT_ENV: dev
+            dockerfile: ./nginx/Dockerfile
+        restart: always
+        ports:
+            - "7000:80"
+            - "443:443"
+        volumes:
+            - ./user:/var/www/html:ro,cached
+            - ./infra/user/nginx/conf.d:/etc/nginx/conf.d
+        depends_on:
+            - web_server
+        networks:
+            - symfony
+
+    user_server:
+        build:
+            context: ./infra/user
+            dockerfile: ./php/Dockerfile
+        volumes:
+            - ./user:/var/www/html:cached
+            - ./infra/user/php/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
+            - ./infra/user/php/config/php.ini:/usr/local/etc/php/php.ini
+            - ./infra/user/php/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+        depends_on:
+            - user_mysql
+        networks:
+            - symfony
+        expose:
+            - "9000"
+            - "9003"
+
+    user_mysql:
+        image: mysql
+        platform: linux/x86_64
+        command: --innodb-use-native-aio=${INNODB_USE_NATIVE_AIO:-1} --sql_mode=${SQL_MODE:-"ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"}
+        environment:
+            MYSQL_ROOT_PASSWORD: secret
+            MYSQL_DATABASE: symfony
+        ports:
+            - "33060:3306"
+        volumes:
+            - mysql_user:/var/lib/mysql:delegated
+        networks:
+            - symfony
+
+    user_myadmin:
+        image: phpmyadmin/phpmyadmin:5
+        environment:
+            PMA_HOST: mysql
+        ports:
+            - "9002:80"
+        depends_on:
+            - user_mysql
+        networks:
+            - symfony
+        volumes:
+            - db_admin_data:/var/www/html
+
 volumes:
     db_admin_data:
     mysql:
+    mysql_user:
     esdata:
 
 networks:

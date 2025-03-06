@@ -8,6 +8,7 @@ use App\Domain\Movie\Command\Handler\CommandHandlerInterface;
 use App\Domain\Movie\Query\Handler\QueryItemsInterface;
 use App\Entity\Movie;
 use App\Form\Type\MovieType;
+use App\Media\Resolver\ThumbnailResolver;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -47,5 +48,15 @@ final class DefaultController extends AbstractController
         return $this->render('default/all.html.twig', [
             'movies' => $movies,
         ]);
+    }
+
+
+    #[Route('/', name: 'app.homepage')]
+    public function homepage(ThumbnailResolver $thumbnailResolver): Response
+    {
+        $resolvedImage = $thumbnailResolver->resolveThumbnail('original/image001.png', 'my_thumb');
+        dump($resolvedImage);
+
+        return $this->render('page/homepage.html.twig');
     }
 }

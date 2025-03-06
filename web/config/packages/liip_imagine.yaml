@@ -1,0 +1,23 @@
+liip_imagine:
+    driver: "gd"
+    loaders:
+        s3.storage:
+            flysystem:
+                filesystem_service: 's3.storage'
+
+    data_loader: s3.storage
+
+    resolvers:
+        flysystem.resolver:
+            flysystem:
+                filesystem_service: 'default.storage'
+                cache_prefix: 'media/cache'
+                root_url: '%kernel.project_dir%/public/media/cache'
+
+    filter_sets:
+        cache: ~
+        my_thumb:
+            quality: 75
+            filters:
+                thumbnail: { size: [ 120, 90 ], mode: outbound }
+                background: { size: [ 124, 94 ], position: center, color: "#000000" }

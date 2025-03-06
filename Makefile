@@ -46,3 +46,6 @@ enter-user:
 
 indexation-web:
 	docker compose exec web_server php bin/console fos:elastica:populate
+
+start-storage:
+	docker compose up -d minio

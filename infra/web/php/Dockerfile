@@ -74,4 +74,9 @@ RUN apt-get install -y git  libxslt-dev libldap2-dev libssl-dev
 #COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 #RUN install-php-extensions gd bcmath zip xsl ldap
 
+# Installer l'extension GD
+RUN apt install -y libpng-dev && \
+    docker-php-ext-install gd
+
+
 USER root

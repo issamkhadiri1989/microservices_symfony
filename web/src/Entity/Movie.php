@@ -28,6 +28,9 @@ class Movie
     #[ORM\Column(type: Types::TEXT)]
     private ?string $synopsis = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $coverPath = null;
+
     public function __construct()
     {
         $this->genres = new ArrayCollection();
@@ -82,6 +85,18 @@ class Movie
     public function setSynopsis(string $synopsis): static
     {
         $this->synopsis = $synopsis;
+
+        return $this;
+    }
+
+    public function getCoverPath(): ?string
+    {
+        return $this->coverPath;
+    }
+
+    public function setCoverPath(?string $coverPath): static
+    {
+        $this->coverPath = $coverPath;
 
         return $this;
     }

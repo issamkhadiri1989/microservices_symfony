@@ -40,4 +40,14 @@ class MovieRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function getMovies(): array
+    {
+        return $this->createQueryBuilder('m')
+            ->orderBy('m.id', 'DESC')
+//            ->setMaxResults(10)
+//            ->setFirstResult(0)
+            ->getQuery()
+            ->getArrayResult();
+    }
 }

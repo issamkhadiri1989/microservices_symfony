@@ -20,6 +20,7 @@ class MovieIndexationListener
     public function __construct(
         private readonly NormalizerInterface $normalizer,
         #[Autowire(service: 'fos_elastica.index.movie')] private readonly Index $index,
+        #[Autowire(env: "ENABLE_INDEXATION")] private readonly bool $indexationEnabled,
     ) {
 
     }
@@ -27,6 +28,9 @@ class MovieIndexationListener
     // had listener rah y tlanca a chaque fois tzid wahd l movie f l bdd. normalement hada makhassch ykon ila kona radi nfouto b rabbit MQ
     public function indexMovieOnPostPersist(Movie $movie, PostPersistEventArgs $event): void
     {
+        if (false === $this->indexationEnabled) {
+            return;
+        }
         $data = $this->normalizer->normalize($movie, context: [
             AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function (object $object, ?string $format, array $context): string {
                 return $object->getName();

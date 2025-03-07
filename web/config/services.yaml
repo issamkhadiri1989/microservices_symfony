@@ -33,3 +33,5 @@ services:
                     secret: "WTKiKwYfZzt3MsblynFS7XNypXYEiMZN7HkQyC6M"
                 endpoint: 'http://minio:9000'
                 use_path_style_endpoint: true
+
+    Symfony\Component\Dotenv\Command\DotenvDumpCommand: ~

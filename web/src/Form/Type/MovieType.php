@@ -9,10 +9,12 @@ use App\Entity\Movie;
 use App\Repository\GenreRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Image;
 
 class MovieType extends AbstractType
 {
@@ -27,7 +29,16 @@ class MovieType extends AbstractType
                 'choice_value' => 'id',
                 'query_builder' => fn(GenreRepository $repository) => $repository->getOrderedGenres(),
                 'multiple' => true,
-            ]);
+            ])
+            ->add('cover', FileType::class, [
+                'mapped' => false,
+                'constraints' => [
+                    new Image([
+                        'maxSize' => '4M',
+                    ])
+                ],
+            ])
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -1,6 +1,31 @@
 {% extends 'base.html.twig' %}
 {% block body %}
 
-    <img src="{{ asset('media/cache/my_thumb/original/image001.png') }}" alt="Alt Text!">
+
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Movie Name</th>
+            <th>Synopsis</th>
+            <th>Cover</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for movie in movies %}
+            <tr>
+                <td>{{ movie.id }}</td>
+                <td>{{ movie.name }}</td>
+                <td>{{ movie.synopsis }}</td>
+                <td>
+                    {% if movie.coverPath is not null %}
+                        <img src="{{ asset('media/cache/my_thumb/original/' ~ movie.coverPath) }}" alt="Alt Text!" width="124" height="94" />
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 
 {% endblock body %}

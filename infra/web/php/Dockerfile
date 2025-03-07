@@ -79,4 +79,30 @@ RUN apt install -y libpng-dev && \
     docker-php-ext-install gd
 
 
+
+ARG IMAGICK_PHP83_FIX_COMMIT=9df92616f577e38625b96b7b903582a46c064739
+
+RUN apt-get -q update \
+    && apt-get -yq upgrade \
+    && export PHP_DEV_DEPS='libmagickwand-dev' \
+    && apt-get -yq install --no-install-recommends libmagickwand-6.q16-6 $PHP_DEV_DEPS \
+    && curl -L https://github.com/remicollet/imagick/archive/${IMAGICK_PHP83_FIX_COMMIT}.zip -o /tmp/imagick-issue-php83.zip \
+    && unzip /tmp/imagick-issue-php83.zip -d /tmp \
+    && pecl install /tmp/imagick-${IMAGICK_PHP83_FIX_COMMIT}/package.xml \
+#    && apt-get purge -y $PHP_DEV_DEPS $PHPIZE_DEPS \
+#    && apt-get autoremove -y --purge \
+    && apt-get clean all \
+    && rm -Rf /tmp/*
+ARG IMAGICK_VERSION=3.7.0
+
+RUN curl -L -o /tmp/imagick.tar.gz https://github.com/Imagick/imagick/archive/refs/tags/${IMAGICK_VERSION}.tar.gz \
+    && tar --strip-components=1 -xf /tmp/imagick.tar.gz \
+    && phpize \
+    && ./configure \
+    && make \
+    && make install \
+    && echo "extension=imagick.so" > /usr/local/etc/php/conf.d/ext-imagick.ini \
+    && rm -rf /tmp/*
+    # <<< End of Imagick installation
+
 USER root

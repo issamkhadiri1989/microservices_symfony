@@ -29,4 +29,6 @@ class Movie
 
     /** @var Genre[]  */
     public iterable $genres;
+
+    public ?string $coverPath = null;
 }

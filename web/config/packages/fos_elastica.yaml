@@ -8,6 +8,7 @@ fos_elastica:
                 id: { type: integer }
                 name: { type: text }
                 synopsis: { type: text }
+                coverPath: { type: text }
                 genres:
                     type: nested
                     properties:

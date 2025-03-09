@@ -160,7 +160,7 @@ services:
             - ./user:/var/www/html:ro,cached
             - ./infra/user/nginx/conf.d:/etc/nginx/conf.d
         depends_on:
-            - web_server
+            - user_server
         networks:
             - symfony
 
@@ -223,6 +223,70 @@ services:
         command: server /data --console-address ":9001"
         networks:
             - symfony
+
+
+## Client
+#    client_proxy:
+#        build:
+#            context: ./infra/client
+#            args:
+#                BUILD_ARGUMENT_ENV: dev
+#            dockerfile: ./nginx/Dockerfile
+#        restart: always
+#        ports:
+#            - "2000:80"
+#            - "4000:443"
+#        volumes:
+#            - ./client:/var/www/html:ro,cached
+#            - ./infra/client/nginx/conf.d:/etc/nginx/conf.d
+#        depends_on:
+#            - client
+#        networks:
+#            - symfony
+#
+#    client:
+#        build:
+#            context: ./infra/client
+#            dockerfile: ./php/Dockerfile
+#        volumes:
+#            - ./client:/var/www/html:cached
+#            - ./infra/client/php/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
+#            - ./infra/client/php/config/php.ini:/usr/local/etc/php/php.ini
+#            - ./infra/client/php/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+#        depends_on:
+#            - client_database
+#        networks:
+#            - symfony
+#        expose:
+#            - "9000"
+#            - "9003"
+#
+#    client_database:
+#        image: mysql
+#        platform: linux/x86_64
+#        command: --innodb-use-native-aio=${INNODB_USE_NATIVE_AIO:-1} --sql_mode=${SQL_MODE:-"ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"}
+#        environment:
+#            MYSQL_ROOT_PASSWORD: secret
+#            MYSQL_DATABASE: symfony
+#        ports:
+#            - "3309:3306"
+#        volumes:
+#            - mysql:/var/lib/mysql:delegated
+#        networks:
+#            - symfony
+#
+#    client_database_admin:
+#        image: phpmyadmin/phpmyadmin:5
+#        environment:
+#            PMA_HOST: client_database
+#        ports:
+#            - "8080:80"
+#        depends_on:
+#            - client_database
+#        networks:
+#            - symfony
+#        volumes:
+#            - db_admin_data:/var/www/html
 
 volumes:
     db_admin_data:

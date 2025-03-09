@@ -49,3 +49,10 @@ indexation-web:
 
 start-storage:
 	docker compose up -d minio
+
+
+#### start the main client #### 
+start-client:
+	docker compose up -d client_proxy client client_database client_database_admin
+enter:
+	docker compose exec client bash

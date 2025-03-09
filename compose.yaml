@@ -198,7 +198,7 @@ services:
     user_myadmin:
         image: phpmyadmin/phpmyadmin:5
         environment:
-            PMA_HOST: mysql
+            PMA_HOST: user_mysql
         ports:
             - "9002:80"
         depends_on:

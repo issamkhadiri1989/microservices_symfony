@@ -8,3 +8,7 @@ api_platform:
     formats:
         jsonld: ['application/ld+json']
         json: ['application/json']
+
+    resource_class_directories:
+        - '%kernel.project_dir%/src/ApiResource'
+        - '%kernel.project_dir%/src/Entity'

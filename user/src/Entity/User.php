@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\UserRepository;
@@ -32,7 +34,11 @@ use Symfony\Component\Serializer\Attribute\Groups;
         ),
         // registration route
         new Post(uriTemplate: '/register'),
-        new Patch(security: "is_granted('IS_AUTHENTICATED_FULLY')")
+        new Patch(
+            security: "is_granted('IS_AUTHENTICATED_FULLY')",
+            normalizationContext: ['groups' => ['api:public:profile']],
+            denormalizationContext: ['groups' => ['api:profile:put']],
+        ),
     ],
 )]
 #[UniqueEntity(fields: ['username'])]
@@ -60,14 +66,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['api:public:profile'])]
+    #[Groups(['api:public:profile', 'api:profile:put'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['api:public:profile'])]
+    #[Groups(['api:public:profile', 'api:profile:put'])]
     private ?string $lastName = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(['api:profile:put'])]
     private ?\DateTimeInterface $dateOfBirth = null;
 
     public function getId(): ?int
@@ -98,9 +105,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @see UserInterface
-     *
      * @return list<string>
+     *
+     * @see UserInterface
      */
     public function getRoles(): array
     {
